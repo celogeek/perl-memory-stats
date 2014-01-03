@@ -1,0 +1,6 @@
+Memory-Stats-*
+.build
+*.swp
+*.bak
+*.tdy
+*.LOG
