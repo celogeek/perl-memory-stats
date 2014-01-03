@@ -64,3 +64,9 @@ __END__
   $stats->stop;
   say "Memory consumed : ", $stats->get_memory_usage;
 
+=head1 DESCRIPTION
+
+This module give you the memory usage (resident RSS), of a part of your process. It use L<Proc::ProcessTable> and should work on all platforms supported by this module.
+
+You can check this link to for explanation : L<http://blog.celogeek.com/201312/394/perl-universal-way-to-get-memory-usage-of-a-process/>
+
