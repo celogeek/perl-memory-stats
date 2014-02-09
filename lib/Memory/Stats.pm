@@ -22,7 +22,9 @@ sub _get_current_memory_usage {
 
 =method start
 
- $mu->start
+Start recording memory usage.
+
+ $mu->start;
 
 =cut
 sub start {
@@ -33,9 +35,11 @@ sub start {
 
 =method checkpoint
 
-Mark a step in the recording,
+Mark a step in the recording.
 
   $mu->checkpoint('title of the checkpoint');
+
+You need to start first.
 
 =cut
 sub checkpoint {
@@ -48,7 +52,11 @@ sub checkpoint {
 
 =method stop
 
-Stop the recording
+Stop the recording.
+
+ $mu->stop;
+
+You need to start first.
 
 =cut
 sub stop {
@@ -63,9 +71,7 @@ sub stop {
 
 Get the current delta memory usage since the last checkpoint
 
-  $mu->start;
-  ...
-  say $mu->delta_usage
+  $mu->delta_usage
 
 =cut
 sub delta_usage {
@@ -77,13 +83,11 @@ sub delta_usage {
 
 =method usage
 
-Get the full usage
+Get the total memory usage (difference between stop and start)
 
-  $mu->start;
-  ...
-  $mu->stop;
+ $mu->usage
 
-  say "Memory::Usage: ", $mu->usage;
+You need to start and stop first.
 
 =cut
 sub usage {
@@ -96,7 +100,11 @@ sub usage {
 
 =method dump
 
-Dump the full stack
+Dump all the recording.
+
+ $mu->dump;
+
+It will display all memory checkpoint, with delta. You can call it at any times.
 
 =cut
 
@@ -106,11 +114,7 @@ sub dump {
   my $prev;
   for my $row(@{$self->_memory_usage}) {
     if ($prev) {
-      if ($row->[0] eq 'stop') {
-        printf("%s: %d - delta: %d - total: %d\n", @$row, $row->[1] - $prev, $row->[1] - $self->_memory_usage->[0][1]);
-      } else {
-        printf("%s: %d - delta: %d\n", @$row, $row->[1] - $prev);
-      }
+      printf("%s: %d - delta: %d - total: %d\n", @$row, $row->[1] - $prev, $row->[1] - $self->_memory_usage->[0][1]);
     } else {
       printf("%s: %d\n", @$row);
     }
@@ -130,8 +134,11 @@ __END__
 
   $stats->start;
   # do something
+  $stats->checkpoint("before my big method")
+  # big method
+  $stats->checkpoint("after my big method")
   $stats->stop;
-  say "Memory consumed: ", $stats->get_memory_usage;
+  $stats->dump;
 
 =head1 DESCRIPTION
 

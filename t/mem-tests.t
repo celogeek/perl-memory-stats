@@ -44,8 +44,8 @@ ok !eval {$mu->checkpoint; 1}, 'we have to start first';
 my $dump = trap {$mu->dump};
 like $trap->stdout, qr{
 start:\s\d+\n
-step1:\s\d+\s\-\sdelta:\s\d+\n
-step2:\s\d+\s\-\sdelta:\s\d+\n
+step1:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
+step2:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
 stop:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
 }x, 'dump ok';
 
