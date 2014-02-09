@@ -8,10 +8,12 @@ use warnings;
 use Proc::ProcessTable;
 use Carp qw/croak/;
 use Moo;
+use MooX::PrivateAttributes;
 
 my $pt = Proc::ProcessTable->new;
-my $current_memory_usage;
-my $delta_memory_usage;
+
+private_has '_current_memory_usage' => (is => 'rw');
+private_has '_delta_memory_usage' => (is => 'rw');
 
 sub _get_current_memory_usage {
 	my %info = map { $_->pid => $_ } @{$pt->table};
@@ -24,7 +26,7 @@ Init the recording
 
 =cut
 sub start {
-	$current_memory_usage = _get_current_memory_usage();
+  shift->_current_memory_usage(_get_current_memory_usage);
 	return;
 }
 
@@ -34,9 +36,10 @@ Stop the recording
 
 =cut
 sub stop {
-	croak "Please call the method 'start' first !" if !defined $current_memory_usage;
-	$delta_memory_usage = _get_current_memory_usage() - $current_memory_usage;
-	$current_memory_usage = undef;
+  my $self = shift;
+	croak "Please call the method 'start' first !" if !defined $self->_current_memory_usage;
+	$self->_delta_memory_usage(_get_current_memory_usage() - $self->_current_memory_usage);
+	$self->_current_memory_usage(undef);
 	return;
 }
 
@@ -46,8 +49,9 @@ Return the last recording memory in KB
 
 =cut
 sub get_memory_usage {
-	croak "Please call the method 'start' then 'stop' first !" if !defined $delta_memory_usage;
-	return $delta_memory_usage;
+  my $self = shift;
+	croak "Please call the method 'start' then 'stop' first !" if !defined $self->_delta_memory_usage;
+	return $self->_delta_memory_usage;
 }
 
 1;
