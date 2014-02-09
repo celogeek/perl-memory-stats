@@ -16,8 +16,8 @@ has '_memory_usage' => (is => 'rw', default => sub {[]});
 sub _get_current_memory_usage {
   my ($info) = grep { $_->pid eq $$ } @{$pt->table};
   my $memory_usage;
-  eval { $memory_usage = $info->rss };
-  return $@ ? -1 : $memory_usage;
+  return -1 if ! defined eval { $memory_usage = $info->rss };
+  return $memory_usage;
 }
 
 =method start
@@ -98,17 +98,17 @@ sub usage {
 }
 
 
-=method dump
+=method report
 
 Dump all the recording.
 
- $mu->dump;
+ $mu->report;
 
 It will display all memory checkpoint, with delta. You can call it at any times.
 
 =cut
 
-sub dump {
+sub report {
   my $self = shift;
   print "--- Memory Usage ---\n";
   my $prev;
@@ -121,6 +121,7 @@ sub dump {
     $prev = $row->[1];
   }
   print "--- Memory Usage ---\n";
+  return;
 }
 
 1;
@@ -138,7 +139,7 @@ __END__
   # big method
   $stats->checkpoint("after my big method")
   $stats->stop;
-  $stats->dump;
+  $stats->report;
 
 =head1 DESCRIPTION
 

@@ -41,12 +41,12 @@ like $mu->usage, qr/\d+/, 'usage ok';
 ok !eval {$mu->stop; 1}, 'we have to start first';
 ok !eval {$mu->checkpoint; 1}, 'we have to start first';
 
-my $dump = trap {$mu->dump};
+my $report = trap {$mu->report};
 like $trap->stdout, qr{
 start:\s\d+\n
 step1:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
 step2:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
 stop:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
-}x, 'dump ok';
+}x, 'report ok';
 
 done_testing;
