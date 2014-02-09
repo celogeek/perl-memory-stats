@@ -1,30 +1,52 @@
 #!perl
 
+use strict;
+use warnings;
 use Test::More;
+use Test::Trap;
 use Memory::Stats;
+use DDP;
 
-my $stats = Memory::Stats->new;
-my $stats2 = Memory::Stats->new;
+plan skip_all => "Skip Test, incompatible system !" if Memory::Stats->_get_current_memory_usage < 0;
 
-ok !eval {$stats->stop; 1}, 'start recording first';
-like $@, qr{\QPlease call the method 'start' first !\E}, 'error message ok';
 
-ok !eval {$stats->get_memory_usage; 1}, 'start and stop recording first';
-like $@, qr{\QPlease call the method 'start' then 'stop' first !\E}, 'error message ok';
+my $mu = Memory::Stats->new;
 
-$stats->start;
-$stats2->start;
+ok !eval {$mu->stop; 1}, 'we have to start first';
+ok !eval {$mu->checkpoint; 1}, 'we have to start first';
 
-my %c = map { $_ => 1 } (1..100_000);
-ok !eval {$stats->get_memory_usage; 1}, 'start and stop recording first';
-like $@, qr{\QPlease call the method 'start' then 'stop' first !\E}, 'error message ok';
-$stats->stop;
+my %c; my $delta_usage;
 
-%c = map { $_ => 1 } (1..200_000);
-$stats2->stop;
+$mu->start;
+%c = map {$_=>1} (1..100_000);
+$delta_usage = $mu->delta_usage;
+$mu->checkpoint('step1');
 
-like $stats->get_memory_usage, qr{^\d+$}, 'memory usage ok';
-like $stats2->get_memory_usage, qr{^\d+$}, 'memory usage ok';
-ok $stats->get_memory_usage < $stats2->get_memory_usage, 'second stats should be greater than the first one';
+%c = map {$_=>1} (1..200_000);
+ok $mu->delta_usage > $delta_usage, 'usage grow up';
+$delta_usage = $mu->delta_usage;
+$mu->checkpoint('step2');
+
+%c = map {$_=>1} (1..300_000);
+ok $mu->delta_usage > $delta_usage, 'usage grow up';
+$delta_usage = $mu->delta_usage;
+
+
+ok !eval{$mu->usage; 1}, 'usage only usable after a stop';
+
+$mu->stop;
+
+like $mu->usage, qr/\d+/, 'usage ok';
+
+ok !eval {$mu->stop; 1}, 'we have to start first';
+ok !eval {$mu->checkpoint; 1}, 'we have to start first';
+
+my $report = trap {$mu->report};
+like $trap->stdout, qr{
+start:\s\d+\n
+step1:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
+step2:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
+stop:\s\d+\s\-\sdelta:\s\d+\s\-\stotal:\s\d+\n
+}x, 'report ok';
 
 done_testing;
