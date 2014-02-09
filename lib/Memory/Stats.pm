@@ -14,13 +14,15 @@ my $pt = Proc::ProcessTable->new;
 has '_memory_usage' => (is => 'rw', default => sub {[]});
 
 sub _get_current_memory_usage {
-	my %info = map { $_->pid => $_ } @{$pt->table};
-	return $info{$$}->rss;
+  my ($info) = grep { $_->pid eq $$ } @{$pt->table};
+  my $memory_usage;
+  eval { $memory_usage = $info->rss };
+  return $@ ? -1 : $memory_usage;
 }
 
 =method start
 
-Init the recording
+ $mu->start
 
 =cut
 sub start {

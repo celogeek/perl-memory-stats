@@ -7,7 +7,7 @@ use Test::Trap;
 use Memory::Stats;
 use DDP;
 
-plan skip_all => "Skip Test, incompatible system !" if ! eval { Memory::Stats->_get_current_memory_usage; 1 };
+plan skip_all => "Skip Test, incompatible system !" if Memory::Stats->_get_current_memory_usage < 0;
 
 
 my $mu = Memory::Stats->new;
