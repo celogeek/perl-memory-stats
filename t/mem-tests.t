@@ -3,7 +3,7 @@
 use Test::More;
 use Memory::Stats;
 
-my $stats = Memory::Stats;
+my $stats = Memory::Stats->new;
 
 ok !eval {$stats->stop; 1}, 'start recording first';
 like $@, qr{\QPlease call the method 'start' first !\E}, 'error message ok';
