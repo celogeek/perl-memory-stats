@@ -135,9 +135,9 @@ __END__
 
   $stats->start;
   # do something
-  $stats->checkpoint("before my big method")
+  $stats->checkpoint("before my big method");
   # big method
-  $stats->checkpoint("after my big method")
+  $stats->checkpoint("after my big method");
   $stats->stop;
   $stats->report;
 
